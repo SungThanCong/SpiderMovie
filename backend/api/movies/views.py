@@ -3,9 +3,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from movies.models import Movie, Genre
 from movies.serializers import MovieSerializer, GenreSerializer
+from rest_framework.pagination import PageNumberPagination
+
 
 @api_view(['GET', 'POST'])
 def movie_list(request):
@@ -21,6 +22,52 @@ def movie_list(request):
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+    
+@api_view(['GET'])
+def movie_pagination(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    movies = paginator.paginate_queryset(Movie.objects.all(), request)
+    serializer = MovieSerializer(movies, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+@api_view(['GET'])
+def movie_category(request, id):
+    try:
+        movies = Movie.objects.all().filter(genres__id=id)
+        serializer = MovieSerializer(movies, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    except Movie.DoesNotExist:
+        return HttpResponse("Not find",status=404)
+    
+@api_view(['GET'])
+def movie_search(request, keyword):
+    try:
+        movies = Movie.objects.all().filter(title__icontains=keyword)
+        serializer = MovieSerializer(movies, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    except Movie.DoesNotExist:
+        return HttpResponse("Not find",status=404)
+    
+@api_view(['GET'])
+def movie_top_rate(request):
+    try:
+        movies = Movie.objects.all().order_by('-total_rating')[:10]
+        serializer = MovieSerializer(movies, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    except Movie.DoesNotExist:
+        return HttpResponse("Not find",status=404)
+    
+@api_view(['GET'])
+def movie_trending(request):
+    try:
+        movies = Movie.objects.all().order_by('-count_view')[:10]
+        serializer = MovieSerializer(movies, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    except Movie.DoesNotExist:
+        return HttpResponse("Not find",status=404)
+
+
     
 @api_view(['GET', 'PUT', 'DELETE'])
 def movie_detail(request, pk):

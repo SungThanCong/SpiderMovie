@@ -16,8 +16,9 @@ Including another URLconf
 """
 from django.urls import include, path
 from rest_framework import routers
-from movies import views
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
 # router = routers.DefaultRouter()
 # router.register(r'users', views.UserViewSet)
@@ -28,8 +29,13 @@ from django.contrib import admin
 urlpatterns = [
     path('api/movies/', include('movies.urls')),
     path('api/auth/', include('authentication.urls')),
+    path('api/evaluate/', include('comments.urls')),
+    path('api/payment/', include('payments.urls')),
+    path("api/manager/", include('manager.urls')),
     path('admin/', admin.site.urls),
    
     # path('', include(router.urls)),
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

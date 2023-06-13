@@ -1,11 +1,14 @@
 from django.urls import path, include
-from rest_framework import routers
-from .views import CommentViewSet, RatingViewSet
-
-router = routers.DefaultRouter()
-router.register(r'comments', CommentViewSet)
-router.register(r'ratings', RatingViewSet)
+from comments import views
 
 urlpatterns = [
-    path('', include(router.urls)),
-]
+    path('comment/<int:id>', views.get_comment_movie),
+    path('comment/add/', views.add_comment),
+    path('comment/update/<int:pk>', views.update_comment),
+    path('rating/<int:id>', views.get_rating_movie),
+    path('rating/user/<int:id>', views.get_rating_movie_user),
+    path('rating/add/', views.add_rating),
+    path('rating/update/<int:pk>', views.update_rating),
+
+    
+];

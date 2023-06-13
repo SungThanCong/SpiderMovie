@@ -12,6 +12,8 @@ class GenreAdmin(admin.ModelAdmin):
             kwargs["to_field_name"] = "name"
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+class MovieAdmin(admin.ModelAdmin):
+    list_display = ('title',)
 
-admin.site.register(Movie)
+admin.site.register(Movie,MovieAdmin)
 admin.site.register(Genre, GenreAdmin)
