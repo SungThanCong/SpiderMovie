@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from payments.serializers import PurchaseSerializer
 from payments.models import Purchase
 from rest_framework.decorators import permission_classes, authentication_classes
+from movies.models import Movie
 import datetime
 from payments.forms import PaymentForm
 from payments.vnpay import vnpay
@@ -72,7 +73,12 @@ def create_receipt(request):
                 price = movies['data'][str(item)]['price'],
                 time = timezone.now()
             )
+            movie = Movie.objects.get(id=movies['data'][str(item)]['id'])
+            movie.count_view += 1
+
             payment.save()
+
+            movie.save()
         return JsonResponse(movies['data'], status=200, safe=False)
     except Purchase.DoesNotExist:
         return HttpResponse("Not find",status=404)

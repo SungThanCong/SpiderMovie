@@ -33,6 +33,9 @@ urlpatterns = [
     path('api/payment/', include('payments.urls')),
     path("api/manager/", include('manager.urls')),
     path('admin/', admin.site.urls),
+
+    # path('jet/', include('jet.urls', 'jet')),  # Django Jet URLS
+    # path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
    
     # path('', include(router.urls)),
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

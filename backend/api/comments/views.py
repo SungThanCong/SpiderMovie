@@ -32,9 +32,13 @@ def add_comment(request):
     user = request.user
     content = request.data.get('content')
     movie = request.data.get('movie')
-    movieInstane = Movie.objects.get(id=movie)
     user = request.user
 
+    try:
+        movieInstane = Movie.objects.get(id=movie)
+    except Movie.DoesNotExist:
+        return HttpResponse("Movie does not exist", status=404)
+    
     if content and movie and user:
         post_time = timezone.now()
         comment = Comment(
@@ -43,7 +47,10 @@ def add_comment(request):
             movie = movieInstane,
             post_time = post_time 
         )
-        comment.save()   
+        try:
+            comment.save()
+        except Exception as e:
+            return HttpResponse(f"Error: {str(e)}", status=500)
         return JsonResponse(model_to_dict(comment), status=200, safe=False)
     return HttpResponse("Error", status=500)
 
@@ -57,6 +64,20 @@ def update_comment(request, pk):
     if serializer.is_valid():      
         serializer.save() 
         return Response(serializer.data)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def remove_comment(request, pk):
+    try:
+        user = request.user
+        comment = get_object_or_404(Comment, pk=pk, user__id=user.id)  
+        comment.delete()
+        return HttpResponse("Delete success", status=200)
+    except Comment.DoesNotExist:
+        return Response({'error': 'Comment not found.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 @api_view(['GET'])
 def get_rating_movie(request,id):
@@ -83,28 +104,68 @@ def get_rating_movie_user(request,id):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def add_rating(request):
-    rating = Rating(
-        user_id = request.user.id,
-        rating = request.data.get('rating'),
-        movie_id = request.data.get('movie')
-    )
- 
-    check = Rating.objects.get(user__id= rating.user_id, movie__id = rating.movie_id)
-    if check:
-        check.rating = rating.rating
-        check.save() 
-        return JsonResponse(model_to_dict(check), status=200, safe=False)
-    else:
-        rating.save()
-        return JsonResponse(model_to_dict(rating), status=200, safe=False)
-    return JsonResponse(model_to_dict(rating), status=500)
+    # try:
+        rating = Rating(
+            user_id = request.user.id,
+            rating = request.data.get('rating'),
+            movie_id = request.data.get('movie')
+        )
+    
+        check = Rating.objects.filter(user__id= rating.user_id, movie__id = rating.movie_id).first()
+        if check:
+            movie = Movie.objects.get(id= rating.movie_id)
+            movie.total_rating -= check.rating
+
+            check.rating = rating.rating
+            check.save() 
+
+            movie.total_rating += int(rating.rating)
+            movie.save()
+
+            return JsonResponse(model_to_dict(check), status=200, safe=False)
+        else:
+            rating.save()
+
+            movie = Movie.objects.get(id=rating.movie_id)
+            movie.total_number_rating += 1
+            movie.total_rating += int(rating.rating)
+            movie.save()
+
+            return JsonResponse(model_to_dict(rating), status=200, safe=False)
+    # except Exception as e:
+    #     return JsonResponse({'error': str(e)}, status=500)
+
         
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def update_rating(request, pk):
-    rating = get_object_or_404(Rating, pk=pk)
-    serializer = RatingSerializer(rating, data=request.data,partial=True)
-    if serializer.is_valid():      
-        serializer.save() 
-        return Response(serializer.data)
+    try:
+        user = request.user
+        rating = get_object_or_404(Rating, pk=pk, user__id = user.id)
+        serializer = RatingSerializer(rating, data=request.data,partial=True)
+        if serializer.is_valid():      
+            serializer.save() 
+            return Response(serializer.data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def remove_rating(request, pk):
+    try:
+        user = request.user
+        rating = get_object_or_404(Rating, pk=pk, user__id = user.id)
+        
+        movie = Movie.objects.get(id=rating.movie_id)
+        movie.total_number_rating -= 1
+        movie.total_rating -= int(rating.rating)
+            
+        rating.delete()
+        movie.save()
+        return HttpResponse("Delete success", status=200)
+    except Rating.DoesNotExist:
+        return Response({'error': 'Rating not found.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

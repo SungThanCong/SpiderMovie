@@ -13,7 +13,7 @@ class GenreAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ('title','date_release')
 
 admin.site.register(Movie,MovieAdmin)
 admin.site.register(Genre, GenreAdmin)

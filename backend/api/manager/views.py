@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from payments.models import Purchase
 from payments.serializers import PurchaseSerializer
+from comments.models import Comment, Rating
+from comments.serializers import CommentSerializer, RatingSerializer
 from authentication.serializers import UserSerializer
 from django.http import HttpResponse, JsonResponse
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -9,6 +11,8 @@ from authentication.permissions import IsManagerUser
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, authentication_classes
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 
 # Create your views here.
 
@@ -72,3 +76,26 @@ def admin_get_detail_payment(request,id):
     except:
         return HttpResponse("Bad request",status=400)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsManagerUser])
+@authentication_classes([JWTAuthentication])
+def admin_get_all_comment(request):
+    try:
+        comments = Comment.objects.all().order_by('-post_time')
+        serializers = CommentSerializer(comments, many=True)
+        return JsonResponse(serializers.data, status=200,safe=False)
+    except:
+        return HttpResponse("Bad request",status=400)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsManagerUser])
+@authentication_classes([JWTAuthentication])
+def admin_remove_comment(request, pk):
+    try:
+        comment = get_object_or_404(Comment, pk=pk)  
+        comment.delete()
+        return HttpResponse("Delete success", status=200)
+    except Comment.DoesNotExist:
+        return Response({'error': 'Comment not found.'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

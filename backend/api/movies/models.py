@@ -11,9 +11,13 @@ class Genre(models.Model):
         db_table = 'genre'
         ordering = ['id']
 
+    def __str__(self):
+        return self.name
+
 class Movie(models.Model):
     title = models.CharField(max_length=255)
-    total_rating = models.FloatField(validators=[MaxValueValidator(10)], default=0)
+    total_rating = models.IntegerField(default=0)
+    total_number_rating = models.IntegerField(default=0)
     description = models.TextField(null=True)
     background= models.ImageField(upload_to='images/background/',null=True)
     banner = models.ImageField(upload_to='images/banner/',null=True)
@@ -26,10 +30,12 @@ class Movie(models.Model):
     movie_length = models.CharField(max_length=100, null=True)
     age_recommend = models.IntegerField(null=True)
     movie_intro = models.TextField(null=True)
-    genres = models.ManyToManyField(Genre)
+    genres = models.ManyToManyField(Genre, null=True)
     price = models.FloatField(default=0)
   
     class Meta:
         db_table = 'movie'
         ordering = [models.functions.Cast('date_release', models.DateTimeField()).desc()]
 
+    def __str__(self):
+        return self.title
