@@ -10,7 +10,7 @@ urlpatterns = [
     path('rating/<int:id>', views.get_rating_movie),
     path('rating/user/<int:id>', views.get_rating_movie_user),
     path('rating/add/', views.add_rating),
-    path('rating/update/<int:pk>', views.update_rating),
+    # path('rating/update/<int:pk>', views.update_rating),
     path('rating/remove/<int:pk>', views.remove_rating),
 
     

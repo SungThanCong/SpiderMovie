@@ -21,6 +21,23 @@ import json
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def get_all_payment(request):
+    """
+    Hàm xử lý yêu cầu để lấy tất cả các thanh toán.
+
+    Tham số:
+    - request: Đối tượng HttpRequest chứa thông tin về yêu cầu được gửi đến server.
+
+    Phương thức:
+    - HTTP GET: Phương thức xử lý yêu cầu GET để lấy tất cả các thanh toán.
+
+    Trả về:
+    - Trả về một đối tượng JsonResponse chứa thông tin về tất cả các thanh toán.
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 nếu không tìm thấy bất kỳ thanh toán nào.
+
+    Cách sử dụng:
+    - Sử dụng đối tượng HttpRequest để gửi yêu cầu GET để lấy tất cả các thanh toán.
+    - Trả về một đối tượng JsonResponse chứa thông tin về tất cả các thanh toán nếu thành công hoặc trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 nếu không tìm thấy bất kỳ thanh toán nào.
+    """
     try:
         payments = Purchase.objects.all()
         serializer = PurchaseSerializer(payments, many=True)
@@ -33,6 +50,23 @@ def get_all_payment(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def get_all_payment_user(request):
+    """
+    Hàm xử lý yêu cầu để lấy tất cả các thanh toán của một người dùng cụ thể.
+
+    Tham số:
+    - request: Đối tượng HttpRequest chứa thông tin về yêu cầu được gửi đến server.
+
+    Phương thức:
+    - HTTP GET: Phương thức xử lý yêu cầu GET để lấy tất cả các thanh toán của một người dùng cụ thể.
+
+    Trả về:
+    - Trả về một đối tượng JsonResponse chứa thông tin về tất cả các thanh toán của một người dùng cụ thể.
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 nếu không tìm thấy bất kỳ thanh toán nào của người dùng cụ thể.
+
+    Cách sử dụng:
+    - Sử dụng đối tượng HttpRequest để gửi yêu cầu GET để lấy tất cả các thanh toán của một người dùng cụ thể.
+    - Trả về một đối tượng JsonResponse chứa thông tin về tất cả các thanh toán của một người dùng cụ thể nếu thành công hoặc trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 nếu không tìm thấy bất kỳ thanh toán nào của người dùng cụ thể.
+    """
     try:
         user = request.user
         payments = Purchase.objects.all().filter(user__id=user.id)
@@ -45,6 +79,24 @@ def get_all_payment_user(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def check_movie_and_user(request,idMovie):
+    """
+    Hàm xử lý yêu cầu để kiểm tra xem một người dùng đã mua một bộ phim cụ thể chưa.
+
+    Tham số:
+    - request: Đối tượng HttpRequest chứa thông tin về yêu cầu được gửi đến server.
+    - idMovie: ID của bộ phim cần kiểm tra.
+
+    Phương thức:
+    - HTTP POST: Phương thức xử lý yêu cầu POST để kiểm tra xem một người dùng đã mua một bộ phim cụ thể chưa.
+
+    Trả về:
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 200 và nội dung "OK" nếu người dùng đã mua bộ phim cụ thể.
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 và nội dung "Not find" nếu người dùng chưa mua bộ phim cụ thể hoặc không tìm thấy bất kỳ bộ phim nào có ID tương ứng.
+
+    Cách sử dụng:
+    - Sử dụng đối tượng HttpRequest để gửi yêu cầu POST để kiểm tra xem một người dùng đã mua một bộ phim cụ thể chưa.
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 200 và nội dung "OK" nếu người dùng đã mua bộ phim cụ thể hoặc trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 và nội dung "Not find" nếu người dùng chưa mua bộ phim cụ thể hoặc không tìm thấy bất kỳ bộ phim nào có ID tương ứng.
+    """
     try:
         user = request.user
         check = Purchase.objects.filter(user__id=user.id, movie__id=idMovie)
@@ -59,6 +111,23 @@ def check_movie_and_user(request,idMovie):
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def create_receipt(request):
+    """
+    Hàm xử lý yêu cầu để tạo một phiếu thu cho các bộ phim được mua bởi một người dùng.
+
+    Tham số:
+    - request: Đối tượng HttpRequest chứa thông tin về yêu cầu được gửi đến server.
+
+    Phương thức:
+    - HTTP POST: Phương thức xử lý yêu cầu POST để tạo một phiếu thu cho các bộ phim được mua bởi một người dùng.
+
+    Trả về:
+    - Trả về một đối tượng JsonResponse chứa thông tin về các bộ phim được mua bởi một người dùng.
+    - Trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 và nội dung "Error" nếu có lỗi xảy ra trong quá trình xử lý yêu cầu.
+
+    Cách sử dụng:
+    - Sử dụng đối tượng HttpRequest để gửi yêu cầu POST để tạo một phiếu thu cho các bộ phim được mua bởi một người dùng.
+    - Trả về một đối tượng JsonResponse chứa thông tin về các bộ phim được mua bởi một người dùng nếu thành công hoặc trả về một đối tượng HttpResponse với mã trạng thái HTTP 404 và nội dung "Error" nếu có lỗi xảy ra trong quá trình xử lý yêu cầu.
+    """
     try:
         user = request.user
         movies = json.loads(request.body)
@@ -80,8 +149,8 @@ def create_receipt(request):
 
             movie.save()
         return JsonResponse(movies['data'], status=200, safe=False)
-    except Purchase.DoesNotExist:
-        return HttpResponse("Not find",status=404)
+    except Exception as e:
+        return HttpResponse("Error",status=404)
     
 # def get_client_ip(request):
 #     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
